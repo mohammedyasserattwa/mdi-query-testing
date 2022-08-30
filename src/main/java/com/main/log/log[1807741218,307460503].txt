@@ -2,7 +2,7 @@
 --> LENGTH TEST: 
 [PASSED] Number of records are equal [329856]
 --> COLUMN_SIZE TEST: 
-[PASSED] Number of columns are the same [0]
+[PASSED] Number of columns are the same [6]
 --> Comparing DATA in both files
 ====================================================== ERROR[1]: Record of ID(SHEET#1) = [2300.0] and ID(SHEET#2) = [2300.0]
 COLUMN_NAME = [POSTAL_CODE,POSTAL_CODE] VALUES = [1002,1003.0]

@@ -39,7 +39,7 @@ public void getData(int sheetNo){
         XSSFRow row = sheet.getRow(i);
         for(int j = 0;j<cols;j++){
             XSSFCell cell = row.getCell(j);
-            tmp.put(titles.get(j).toString(), cell.toString());
+            tmp.put((String) titles.get(j).toString(), cell.toString());
         }
         if(i == 1)
             result.next = tmp;
@@ -121,9 +121,9 @@ public void compare(Record db1 , Record db2,String fileType1, String fileType2) 
         myWriter.write("[FAILED] Number of records are different [sheet#1 = "+db1.getCount()+"][sheet#2 = "+db2.getCount()+"]\n");
     myWriter.write("--> COLUMN_SIZE TEST: \n");
     if(db1.keys.size() == db2.keys.size())
-        myWriter.write("[PASSED] Number of columns are the same ["+db1.keys.size()+"]\n");
+        myWriter.write("[PASSED] Number of columns are the same ["+db2.next.keys.size()+"]\n");
     else
-        myWriter.write("[FAILED] Number of columns are different [sheet#1 = "+db1.keys.size()+"][sheet#2 = "+db2.keys.size()+"]\n");
+        myWriter.write("[FAILED] Number of columns are different [sheet#1 = "+db1.next.keys.size()+"][sheet#2 = "+db2.next.keys.size()+"]\n");
     myWriter.write("--> Comparing DATA in both files\n");
     while(db1.next != null && db2.next != null){
         if(!db1.values.toString().equals(db2.values.toString())){
