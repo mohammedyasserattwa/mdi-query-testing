@@ -25,7 +25,7 @@ public Excel(String path) throws IOException {
     this.path = path;
     this.fis = new FileInputStream(path);
     this.workbook = new XSSFWorkbook(this.fis);
-    this.db = new Database("jdbc:mysql://localhost:3306","root","root","trial");
+    this.db = new Database("jdbc:mysql://localhost:3306","root","rootroot","fady");
 }
 
 public void getData(int sheetNo){
