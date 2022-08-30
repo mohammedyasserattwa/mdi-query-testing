@@ -113,7 +113,7 @@ public void compare(Record db1 , Record db2,String fileType1, String fileType2) 
     log.createNewFile();
     FileWriter myWriter = new FileWriter(FILE_PATH);
     int ERROR_ID = 1;
-    myWriter.write("--> Comparing "+fileType1+" file to "+fileType2+"\n");
+    myWriter.write("--> Comparing "+fileType1+" file to "+fileType2+" file\n");
     myWriter.write("--> LENGTH TEST: \n");
     if(db1.getCount() == db2.getCount())
         myWriter.write("[PASSED] Number of records are equal ["+db1.getCount()+"]\n");

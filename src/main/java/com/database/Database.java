@@ -59,6 +59,38 @@ public class Database {
         }
         return result;
     }
+    public Record read(char start, char end, String table) throws SQLException{
+        Record result = new Record();
+        ResultSet rs = this.stmt.executeQuery("SELECT * FROM " + table);
+        ResultSetMetaData metaData = rs.getMetaData();
+        Record tmp = new Record();
+        int j = 1;
+        int counter = 0;
+        while(rs.next()) {
+            if(start == '*' || end == '*'){
+                for (int i = 0; i < metaData.getColumnCount(); i++) {
+                    tmp.put(metaData.getColumnName(i + 1), rs.getString(metaData.getColumnName(i + 1)));
+                }
+                if(j++ == 1)
+                    result.next = tmp;
+                tmp.next = new Record();
+                tmp = tmp.next;
+            }
+            else if(counter > (Integer.parseInt(String.valueOf(start))) && counter < (Integer.parseInt(String.valueOf(end)))) {
+                
+                for (int i = 0; i < metaData.getColumnCount(); i++) {
+                    tmp.put(metaData.getColumnName(i + 1), rs.getString(metaData.getColumnName(i + 1)));
+                }
+                if(j++ == 1)
+                    result.next = tmp;
+                tmp.next = new Record();
+                tmp = tmp.next;
+            }
+                
+            counter++;
+        }
+        return result;
+    }
     public void insert(String data,String fields, String table) throws SQLException {
         String sql = "INSERT IGNORE INTO " + table + "("+fields+") VALUES("+ data +")";
         this.stmt.executeUpdate(sql);
