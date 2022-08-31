@@ -4,6 +4,7 @@ import org.apache.poi.xssf.usermodel.*;
 import com.database.Database;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public Excel(String path) throws IOException {
     this.path = path;
     this.fis = new FileInputStream(path);
     this.workbook = new XSSFWorkbook(this.fis);
-    this.db = new Database("jdbc:mysql://localhost:3306","root","rootroot","fady");
+    this.db = new Database("jdbc:mysql://localhost:3306","root","root","trial");
 }
 
 public void getData(int sheetNo){
@@ -107,10 +108,37 @@ private String toString(ArrayList<String> title){
     titles = titles.substring(0,titles.length()-1);
     return titles;
 }
+public Record map() throws IOException{
+    String path = "src/main/java/com/excel/sheets/map.xlsx";
+    FileInputStream fis = new FileInputStream(path);
+    XSSFWorkbook workbook = new XSSFWorkbook(fis);
+    XSSFSheet sheet = workbook.getSheetAt(0);
+    int rows = sheet.getLastRowNum();
+    int cols = sheet.getRow(1).getLastCellNum();
+    Record result = new Record();
+    Record tmp = new Record();
+    for(int i = 0; i<=rows;i++){
+        XSSFRow row = sheet.getRow(i);
+        ArrayList<String> myArr = new ArrayList<String>();
+        for(int j = 0;j<cols;j++){
+            XSSFCell cell = row.getCell(j);
+           myArr.add(cell.toString());
+        }
+        // System.out.println(myArr.toString());
+        tmp.put(myArr.get(0),myArr.get(1));
+        if(i == 0)
+            result = tmp;
+        tmp.next = new Record();
+        tmp = tmp.next;
+    }
+    System.out.println(result.getCount());
+    return result;
+}
 public void compare(Record db1 , Record db2,String fileType1, String fileType2) throws IOException{
     String FILE_PATH = "./src/main/java/com/main/log/log["+db1.hashCode()+","+db2.hashCode()+"].txt";
     File log = new File(FILE_PATH);
     log.createNewFile();
+    
     FileWriter myWriter = new FileWriter(FILE_PATH);
     int ERROR_ID = 1;
     myWriter.write("--> Comparing "+fileType1+" file to "+fileType2+" file\n");
@@ -125,22 +153,35 @@ public void compare(Record db1 , Record db2,String fileType1, String fileType2) 
     else
         myWriter.write("[FAILED] Number of columns are different [sheet#1 = "+db1.next.keys.size()+"][sheet#2 = "+db2.next.keys.size()+"]\n");
     myWriter.write("--> Comparing DATA in both files\n");
+    Record map = this.map();
+    Record tmp = map;
+    // System.out.println(tmp.next.next.next.values.toString());
     while(db1.next != null && db2.next != null){
+        tmp = map;
         if(!db1.values.toString().equals(db2.values.toString())){
             String ID = db1.values.get(0);
             String ID2 = db1.values.get(0);
             myWriter.write("====================================================== ERROR["+(ERROR_ID++)+"]: Record of ID(SHEET#1) = ["+ID+"] and ID(SHEET#2) = ["+ID2+"]\n");
-            
-            for(int i = 0;i<db1.values.size();i++){
-                if(!db1.values.get(i).equals(db2.values.get(i))){
-                    myWriter.write("COLUMN_NAME = ["+db1.keys.get(i)+","+db2.keys.get(i)+"] VALUES = ["+db1.values.get(i)+","+db2.values.get(i)+"]\n");
-                }
+            int i = 0;
+            // for(int i = 0; i < db1.values.size(); i++){
+                // System.out.println(tmp.getCount());
+            while(tmp.next != null){
+                // System.out.println(tmp.values);
+                
+                // System.out.println(db1.values.get(i) + "  " + db2.values.get(db2.keys.indexOf(tmp.values.get(0))));
+                if(!db1.values.get(i).equals(db2.values.get(db2.keys.indexOf(tmp.values.get(0)))))
+                    myWriter.write("COLUMN_NAME = ["+tmp.keys.get(0)+","+tmp.values.get(0)+"] VALUES = ["+db1.values.get(i)+","+db2.values.get(i)+"]\n");
+                i++;
+                // System.out.println(i);
+                tmp = tmp.next;
             }
             myWriter.write("\n");
         }
         db1 = db1.next;
         db2 = db2.next;
+       
     }
+    
     myWriter.close();
 }
 }
