@@ -1,22 +1,46 @@
 package com.main;
 import com.excel.Excel;
 import com.database.Database;
+
+import java.util.ArrayList;
+
 import com.Helpers.Record;
+
+import com.Helpers.Simulator;
 public class App implements Runnable {
+    String[] paths = {};
+    String table = "";
+    String table2 = "";
+    public App(String[] paths, String table){
+        this.paths = paths;
+        this.table = table;
+    }
+    public App(String[] paths, String table, String table2){
+        this.paths = paths;
+        this.table = table;
+        this.table2 = table2;
+    }
+    public App(String[] paths){
+        this.paths = paths;
+    }
+    Database db = new Database("jdbc:mysql://localhost:3306","root","root","trial");
 	public void run() {
         try {
-            Excel excel = new Excel("src/main/java/com/excel/sheets/locations.xlsx");
-            excel.getData(0);
-            // //        System.out.println(excel.sheetList.get(0));
-            Excel excel2 = new Excel("src/main/java/com/excel/sheets/locations2.xlsx");
-            excel2.getData(0);
-            // Database db = new Database("jdbc:mysql://localhost:3306","root","root","trial");
-            // Record result = db.read("*","locations");
-            // Record result2 = db.read('1','3',"places");
-            // excel.map();
-            // System.out.println(result2.next.values.toString());
-            excel.compare(excel.records, excel2.records,"EXCEL","EXCEL");
-            // System.out.println(excel.compare(excel2.sheetList, result));
+            // System.out.println("Hena");
+            Excel excel2 = new Excel(paths[0],100,105);
+            // System.out.println(excel2.records.getCount());
+            Excel excel1 = new Excel(paths[1],1000,1005);
+            Excel.compare(excel1.records, excel2.records, "EXCEL", "EXCEL");
+            // System.out.println(excel1.records.getCount());
+            
+            // Simulator sim1 = new Simulator(this.paths[0],this.table);
+            // sim1.runInsert();
+            
+            // Record dbrecord = db.read("*", this.table);
+            // Record dbrecord2 = db.read("*", this.table2);
+            // Excel.compare(dbrecord, dbrecord2,"MYSQL","MYSQL");
+            // excel1.compare(excel1.records.range(1,50), excel1.records.range(156,200), "EXCEL", "EXCEL");
+            // System.out.println(excel1.records.range(1,50).getCount());
         } catch (Exception e) {
             e.printStackTrace();
         }

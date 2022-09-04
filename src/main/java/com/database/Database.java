@@ -93,6 +93,7 @@ public class Database {
     }
     public void insert(String data,String fields, String table) throws SQLException {
         String sql = "INSERT IGNORE INTO " + table + "("+fields+") VALUES("+ data +")";
+        // System.out.println(sql);
         this.stmt.executeUpdate(sql);
     }
     public void delete(String ID, String IDField, String table) throws SQLException {
@@ -102,7 +103,8 @@ public class Database {
         this.stmt.executeUpdate("UPDATE " + table + " SET " + data + " WHERE ID = " + ID);
     }
     public void createTable(String fields, String name) throws SQLException {
-        String sql = "create table if not exists "+name+" ("+fields+")";
+        String sql = "create table if not exists "+name+"("+fields+")";
+        // System.out.println(sql);
         this.stmt.execute(sql);
     }
 }
