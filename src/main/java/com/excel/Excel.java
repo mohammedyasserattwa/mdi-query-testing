@@ -162,14 +162,15 @@ public static Record map() throws IOException{
     return result;
 }
 
-public static void compare(Record db1 , Record db2,String fileType1, String fileType2) throws IOException{
-    String FILE_PATH = "./src/main/java/com/main/log/log["+db1.hashCode()+","+db2.hashCode()+"].txt";
+public static void compare(Record db1 , Record db2,String fileType1, String fileType2, String fileName1, String fileName2) throws IOException{
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
+    Date date = new Date();
+    String FILE_PATH = "./src/main/java/com/main/log/log["+fileName1+"]_["+fileName2+"]_["+ sdf.format(date)+"].txt";
     File log = new File(FILE_PATH);
     log.createNewFile();
     String result = "";
     FileWriter myWriter = new FileWriter(FILE_PATH);
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
-    Date date = new Date();
+    
 
     result += "Comparing "+fileType1+" file with "+fileType2+" file\n\n-->> Comparing Length of both files_"+sdf.format(date)+" \n";
     if(db1.getCount() == db2.getCount())

@@ -59,35 +59,21 @@ public class Database {
         }
         return result;
     }
-    public Record read(char start, char end, String table) throws SQLException{
-        Record result = new Record();
-        ResultSet rs = this.stmt.executeQuery("SELECT * FROM " + table);
+    public Record read(String col, int start, int end, String table) throws SQLException{
+        String sql = "SELECT " + col + " from " + table + " LIMIT " + start+","+end+";";
+        ResultSet rs = this.stmt.executeQuery(sql);
         ResultSetMetaData metaData = rs.getMetaData();
+        Record result = new Record();
         Record tmp = new Record();
         int j = 1;
-        int counter = 0;
-        while(rs.next()) {
-            if(start == '*' || end == '*'){
-                for (int i = 0; i < metaData.getColumnCount(); i++) {
-                    tmp.put(metaData.getColumnName(i + 1), rs.getString(metaData.getColumnName(i + 1)));
-                }
-                if(j++ == 1)
-                    result.next = tmp;
-                tmp.next = new Record();
-                tmp = tmp.next;
+        while (rs.next()) {
+            for (int i = 0; i < metaData.getColumnCount(); i++) {
+                tmp.put(metaData.getColumnName(i + 1), rs.getString(metaData.getColumnName(i + 1)));
             }
-            else if(counter > (Integer.parseInt(String.valueOf(start))) && counter < (Integer.parseInt(String.valueOf(end)))) {
-                
-                for (int i = 0; i < metaData.getColumnCount(); i++) {
-                    tmp.put(metaData.getColumnName(i + 1), rs.getString(metaData.getColumnName(i + 1)));
-                }
-                if(j++ == 1)
-                    result.next = tmp;
-                tmp.next = new Record();
-                tmp = tmp.next;
-            }
-                
-            counter++;
+            if (j++ == 1)
+                result.next = tmp;
+            tmp.next = new Record();
+            tmp = tmp.next;
         }
         return result;
     }

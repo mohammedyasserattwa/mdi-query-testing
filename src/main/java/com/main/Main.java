@@ -14,7 +14,7 @@ public class Main {
         // int locCounter = 0;
         for (int i = 0; i < 1; i+=2) {
             // System.out.println("Hena");
-            App worker = new App(arr[0]);
+            App worker = new App(arr[0],tables[0]);
             executor.execute(worker);
         }
         executor.shutdown();
