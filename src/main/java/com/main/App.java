@@ -27,10 +27,10 @@ public class App implements Runnable {
 	public void run() {
         try {
             // System.out.println("Hena");
-            // Excel excel2 = new Excel(paths[0],100,105);
+            Excel excel2 = new Excel(paths[0]);
             // // System.out.println(excel2.records.getCount());
-            // Excel excel1 = new Excel(paths[1],100,105);
-            // Excel.compare(excel1.records, excel2.records, "EXCEL", "EXCEL", excel1.fileName, excel2.fileName);
+            Excel excel1 = new Excel(paths[1]); 
+            Excel.compare(excel1.records, excel2.records, "EXCEL", "EXCEL", excel1.fileName, excel2.fileName);
             // System.out.println(excel1.records.getCount());
             
             // Simulator sim1 = new Simulator(this.paths[0],this.table);
@@ -39,7 +39,7 @@ public class App implements Runnable {
             // Record dbrecord = db.read("*",1,10,this.table);
             // Record dbrecord2 = db.read("*", this.table2);
             // Excel.compare(dbrecord, dbrecord2,"MYSQL","MYSQL");
-            // excel1.compare(excel1.records.range(1,50), excel1.records.range(156,200), "EXCEL", "EXCEL");
+            // excel1.compare(excel1.records.range(1,50), excel1.records.range(156,200), "EXCEL", "EXCEL");  
             // System.out.println(excel1.records.range(1,50).getCount());
         } catch (Exception e) {
             e.printStackTrace();

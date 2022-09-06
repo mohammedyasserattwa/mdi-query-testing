@@ -1,5 +1,6 @@
 package com.excel;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.*;
 import com.database.Database;
 
@@ -11,7 +12,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.io.File;
-import java.io.FileWriter; 
+import java.io.FileWriter;
+
+import com.Helpers.Function;
 import com.Helpers.Record;
 
 public class Excel {
@@ -52,6 +55,12 @@ private Path filepath;
 private int rows;
 private int cols;
 private ArrayList<String> titles;
+
+/**
+ * This function initializes the sheet, filepath, filename, rows, cols, and titles of the sheet
+ * 
+ * @param sheetNo the sheet number in the excel file
+ */
 public void init(int sheetNo){
     this.sheet = this.workbook.getSheetAt(sheetNo);
     this.filepath = Paths.get(this.path);
@@ -61,11 +70,18 @@ public void init(int sheetNo){
     this.cols = sheet.getRow(1).getLastCellNum();
     this.titles = getTitles(sheet, cols);
 }
+/**
+ * It reads the data from the excel file and stores it in a linked list
+ * 
+ * @param sheetNo The sheet number in the excel file
+ * @param range the row number to start reading from
+ * @param action START or END
+ */
 public void getData(int sheetNo, int range, String action){
     Record result = new Record();
     Record tmp = new Record();
     XSSFCell cell;
-    for (int i = (action == "START")?range:1; i < ((action == "START")?this.rows:range); i++) {
+    for (int i = (action == "START")?range:1; i <= ((action == "START")?this.rows:range); i++) {
         XSSFRow row = this.sheet.getRow(i);
         for (int j = 0; j < this.cols; j++) {
             cell = row.getCell(j);
@@ -87,7 +103,7 @@ public void getData(int sheetNo, int start, int end){
     XSSFCell cell;
     XSSFRow row;
     if(start < end && end < rows){    
-        for (int i = start; i < end; i++) {
+        for (int i = start; i <= end; i++) {
             row = this.sheet.getRow(i);
             for (int j = 0; j < this.cols; j++) {
                 cell = row.getCell(j);
@@ -111,7 +127,7 @@ public void getData(int sheetNo) throws IllegalArgumentException, IllegalAccessE
     Record tmp = new Record();
     XSSFCell cell;
     XSSFRow row;
-    for(int i = 1; i<this.rows;i++){
+    for(int i = 1; i<=this.rows;i++){
         row = this.sheet.getRow(i);
         for(int j = 0;j<this.cols;j++){
             cell = row.getCell(j);
@@ -126,6 +142,14 @@ public void getData(int sheetNo) throws IllegalArgumentException, IllegalAccessE
     this.records = result;
 }
 
+/**
+ * It takes a sheet and the number of columns in the sheet and returns an ArrayList of the titles of
+ * the columns
+ * 
+ * @param sheet the sheet you want to read
+ * @param cols the number of columns in the sheet
+ * @return An ArrayList of Strings.
+ */
 private ArrayList<String> getTitles(XSSFSheet sheet,int cols){
     XSSFRow row = sheet.getRow(0);
     ArrayList<String> titles = new ArrayList<String>();
@@ -135,6 +159,8 @@ private ArrayList<String> getTitles(XSSFSheet sheet,int cols){
     }
     return titles;
 }
+
+private static ArrayList<Function> functionsArray = new ArrayList<Function>();
 public static Record map() throws IOException{
     String path = "src/main/java/com/excel/sheets/map.xlsx";
     FileInputStream fis = new FileInputStream(path);
@@ -144,13 +170,14 @@ public static Record map() throws IOException{
     int cols = sheet.getRow(1).getLastCellNum();
     Record result = new Record();
     Record tmp = new Record();
-    
+    XSSFSheet functions = workbook.getSheetAt(1);
+    int funcrows = functions.getLastRowNum();
     for(int i = 0; i<=rows;i++){
         XSSFRow row = sheet.getRow(i);
         ArrayList<String> myArr = new ArrayList<String>();
         for(int j = 0;j<cols;j++){
             XSSFCell cell = row.getCell(j);
-           myArr.add(cell.toString());
+            myArr.add(cell.toString());
         }
         tmp.put(myArr.get(0),myArr.get(1));
         if(i == 0)
@@ -158,6 +185,12 @@ public static Record map() throws IOException{
         tmp.next = new Record();
         tmp = tmp.next;
     }
+    for(int i = 0; i <= funcrows;i++){
+        XSSFRow row = functions.getRow(i);
+        Function f = new Function(row.getCell(0).toString());
+        Excel.functionsArray.add(f);
+    }
+    
     System.out.println("[DONE] Successfully created the map array");
     return result;
 }
@@ -187,12 +220,28 @@ public static void compare(Record db1 , Record db2,String fileType1, String file
     Record tmp = map;
     int ERROR_COUNT = 0;
     myWriter.write(result);
+    db1 = db1.next;
+    db2 = db2.next;
     while(db1.next != null && db2.next != null){
+        for(int j = 0; j < Excel.functionsArray.size();j++){
+            // if(db1.keys.contains(Excel.functionsArray.get(j).target)){
+                // System.out.println("applied functions on first file:");
+                
+                // System.out.println((db1.keys.indexOf(Excel.functionsArray.get(j).source)));
+                Excel.functionsArray.get(j).apply(db1.values.get(db1.keys.indexOf(Excel.functionsArray.get(j).source)),db1.values.get(db1.keys.indexOf(Excel.functionsArray.get(j).target)));
+                // if(db1.keys.indexOf(Excel.functionsArray.get(j).target) == -1){
+                //     System.out.println(Excel.functionsArray.get(j).target);
+                //     System.out.println(db1.keys.toString());
+                // }
+                // }
+            // if(db2.keys.contains(Excel.functionsArray.get(j).))
+        }
         if(!db1.values.toString().equals(db2.values.toString())){
             ERROR_COUNT++;
             tmp = map;
             int i = 0;
             while(tmp.next != null){
+                if(tmp.values.get(0) != "")
                 if(!db1.values.get(i).equals(db2.values.get(db2.keys.indexOf(tmp.values.get(0)))))
                 myWriter.write("\tERROR["+sdf.format(date)+"]: @ID = ["+db1.values.get(0)+"] COLUMN_NAME in SHEET#1 = ["+tmp.keys.get(0)+"] VALUE in SHEET#1 = ["+db1.values.get(i)+"]  COLUMN_NAME in SHEET#2 = ["+tmp.values.get(0)+"] VALUE in SHEET#2= ["+db2.values.get(i)+"]\n");
                 i++;
