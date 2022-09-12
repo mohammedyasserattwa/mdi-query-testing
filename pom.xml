@@ -45,6 +45,14 @@
     <artifactId>commons-lang3</artifactId>
     <version>3.12.0</version>
 </dependency>
+<dependency>
+    <groupId>ojdbc</groupId>
+    <artifactId>ojdbc</artifactId>
+    <scope>system</scope>
+    <version>7.0</version>
+    <systemPath>${basedir}/src/lib/ojdbc7.jar</systemPath>   
+</dependency>
+
   </dependencies>
 
   <build>

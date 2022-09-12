@@ -17,16 +17,8 @@ public class Function {
     public String function;
     public String source;
     public String target;
-    private String new_col;
-    private String FILE_PATH;
     public Function(String command) throws IOException {
         this.command = command;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
-        Date date = new Date();
-        this.FILE_PATH = "./src/main/java/com/main/functions/functions[" + this.command + "]_["
-                + sdf.format(date) + "].txt";
-        File log = new File(this.FILE_PATH);
-        log.createNewFile();
         this.interpreter();
     }
     public void interpreter(){
@@ -35,18 +27,16 @@ public class Function {
         this.target = this.command.substring(this.command.lastIndexOf(" ")+1);
         // System.out.println(this.target);
     }
-    public void apply(String val1, String val2) throws IOException{
-        FileWriter myWriter = new FileWriter(this.FILE_PATH,true);
+    public long apply(String val1, String val2) throws IOException{
         switch(this.function){
             case "+":
                 if(isInt(val1) && isInt(val2)){
-                    myWriter.write("Applied Function ADD " + (Integer.parseInt(val1) + Integer.parseInt(val2)) + "\n");
+                    return ((Integer.parseInt(val1) + Integer.parseInt(val2)));
                 }
                 break;
             case "-":
-                // System.out.println(val1);
                 if(isInt(val1) && isInt(val2)){
-                    myWriter.write("Applied Function SUBSTRACT " + (Integer.parseInt(val1) - Integer.parseInt(val2)) + "\n");
+                    return (Integer.parseInt(val1) - Integer.parseInt(val2));
                 }
                 break;
             case "DIFF":
@@ -54,33 +44,32 @@ public class Function {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
                 LocalDate d1 = (!dv.isValid(val1)) ? null : LocalDate.parse(val1, formatter);
                 LocalDate d2 = (!dv.isValid(val2)) ? null : LocalDate.parse(val2, formatter);
-
                 SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
                 if (!dv.isValid(val1))
                     d1 = LocalDate.parse(sdf.format(DateUtil.getJavaDate(Double.parseDouble(val1))), formatter);
                 if (!dv.isValid(val2))
                     d2 = LocalDate.parse(sdf.format(DateUtil.getJavaDate(Double.parseDouble(val2))), formatter);
-
                 long daysBetween = ChronoUnit.DAYS.between(d1, d2);
                 long years = daysBetween / 365;
                 daysBetween %= 365;
                 long months = daysBetween / 30;
                 daysBetween %= 30;
-                myWriter.write(years + " Year/s " + months + " Month/s " + daysBetween + " Days \n");
-            break;
-                case "*":
+                return daysBetween;
+            case "*":
                 if (isInt(val1) && isInt(val2)) {
-                    myWriter.write("Applied Function MULTIPLY " + (Integer.parseInt(val1) * Integer.parseInt(val2)) + "\n"); 
+                   return (Integer.parseInt(val1) * Integer.parseInt(val2)); 
                 }
                 break;
-                case "/":
+            case "/":
                 if (isInt(val1) && isInt(val2)) {
-                    myWriter.write("Applied Function DIVIDE " + (Integer.parseInt(val1) / Integer.parseInt(val2))+"\n");
+                    return (Integer.parseInt(val1) / Integer.parseInt(val2));
                 }
                 break;
-
             }
-            myWriter.close();
+        return Long.MAX_VALUE;
+    }
+    public static boolean compare(long f1, long f2){
+        return f1 == f2;
     }
     
     private boolean isInt(String val){
