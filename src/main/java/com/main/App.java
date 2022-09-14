@@ -1,5 +1,8 @@
 package com.main;
 import com.excel.Excel;
+
+import java.sql.ResultSet;
+
 import com.Helpers.Map;
 import com.database.Database;
 
@@ -25,10 +28,13 @@ public class App implements Runnable {
             
             // map.getAll();
             // System.out.println("Hena");
-            // Excel excel2 = new Excel(paths[0]);
+            // Excel excel2 = new Excel(paths[1]);
+            // Excel.compareTo(excel2);
             // // // System.out.println(excel2.records.getCount());
-            // Excel excel1 = new Excel(paths[0]); 
-            // Excel.compare(excel1.records, excel2.records,"EXCEL","EXCEL","Locations","Locations2");
+            Excel excel1 = new Excel(paths[0]);
+            ResultSet db1 = db.read("*", this.table);
+            Excel.compareTo(excel1,db1);
+            // Excel.compare(excel1.records, excel2.records,"EXCEL","EXCEL");
             // System.out.println(excel1.records.getCount());
             // Node node = new Node(new ArrayList<String>());
             // ArrayList<String> data = new ArrayList<String>();
@@ -36,15 +42,15 @@ public class App implements Runnable {
             // node.insert(data);
             // node.show();
             
-            
+            // Database db = new Database();
             // Simulator sim1 = new Simulator(this.paths[0],this.table);
             // sim1.runInsert();
             
-            com.Helpers.Record dbrecord = db.read("*",this.table);
+            // com.Helpers.Record dbrecord = db.read("*",this.table);
             // System.out.println(dbrecord.next.keys);
-            com.Helpers.Record dbrecord2 = db.read("*", this.table2);
+            // com.Helpers.Record dbrecord2 = db.read("*", this.table2);
             // System.out.println(dbrecord2.next.keys);
-            Excel.compare(dbrecord, dbrecord2,"MYSQL","MYSQL");
+            // Excel.compare(dbrecord, dbrecord2,"MYSQL","MYSQL");
             // excel1.compare(excel1.records.range(1,50), excel1.records.range(156,200), "EXCEL", "EXCEL");  
             // System.out.println(excel1.records.range(1,50).getCount());
         } catch (Exception e) {

@@ -1,16 +1,22 @@
 package com.excel;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.*;
 import com.database.Database;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.io.File;
 import java.io.FileWriter;
 
@@ -32,18 +38,18 @@ public class Excel {
         this.path = path;
         this.fis = new FileInputStream(path);
         this.workbook = new XSSFWorkbook(this.fis);
-        this.db = new Database("jdbc:mysql://localhost:3306", "root", "rootroot", "fady");
+        // this.db = new Database("jdbc:mysql://localhost:3306", "root", "rootroot", "fady");
         this.init(0);
-        this.getData(0);
+        // this.getData(0);
     }
 
     public Excel(String path, int start, int end) throws IOException, IllegalArgumentException, IllegalAccessException {
         this.path = path;
         this.fis = new FileInputStream(path);
         this.workbook = new XSSFWorkbook(this.fis);
-        this.db = new Database("jdbc:mysql://localhost:3306", "root", "rootroot", "fady");
+        // this.db = new Database("jdbc:mysql://localhost:3306", "root", "rootroot", "fady");
         this.init(0);
-        this.getData(0, start, end);
+        // this.getData(0, start, end);
     }
 
     public Excel(String path, int range, String action)
@@ -51,9 +57,9 @@ public class Excel {
         this.path = path;
         this.fis = new FileInputStream(path);
         this.workbook = new XSSFWorkbook(this.fis);
-        this.db = new Database("jdbc:mysql://localhost:3306", "root", "rootroot", "fady");
+        // this.db = new Database("jdbc:mysql://localhost:3306", "root", "rootroot", "fady");
         this.init(0);
-        this.getData(0, range, action);
+        // this.getData(0, range, action);
     }
 
     private XSSFSheet sheet;
@@ -77,7 +83,7 @@ public class Excel {
         this.fileName = fileName;
         this.rows = sheet.getLastRowNum();
         this.cols = sheet.getRow(1).getLastCellNum();
-        this.titles = getTitles(sheet, cols);
+        // this.titles = getTitles(sheet, cols);
     }
 
     /**
@@ -96,7 +102,7 @@ public class Excel {
             for (int j = 0; j < this.cols; j++) {
                 cell = row.getCell(j);
                 tmp.put((String) this.titles.get(j).toString(),
-                        (cell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+                        (cell.getCellType() == CellType.NUMERIC)
                                 ? String.format("%.0f", cell.getNumericCellValue())
                                 : cell.toString());
             }
@@ -120,7 +126,7 @@ public class Excel {
                 for (int j = 0; j < this.cols; j++) {
                     cell = row.getCell(j);
                     tmp.put((String) this.titles.get(j).toString(),
-                            (cell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+                            (cell.getCellType() == CellType.NUMERIC)
                                     ? String.format("%.0f", cell.getNumericCellValue())
                                     : cell.toString());
                 }
@@ -145,7 +151,7 @@ public class Excel {
             for (int j = 0; j < this.cols; j++) {
                 cell = row.getCell(j);
                 tmp.put((String) this.titles.get(j).toString(),
-                        (cell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+                        (cell.getCellType() == CellType.NUMERIC)
                                 ? String.format("%.0f", cell.getNumericCellValue())
                                 : cell.toString());
             }
@@ -167,10 +173,10 @@ public class Excel {
      * @param cols  the number of columns in the sheet
      * @return An ArrayList of Strings.
      */
-    private ArrayList<String> getTitles(XSSFSheet sheet, int cols) {
-        XSSFRow row = sheet.getRow(0);
+    private static ArrayList<String> getTitles(Excel e) {
+        XSSFRow row = e.sheet.getRow(0);
         ArrayList<String> titles = new ArrayList<String>();
-        for (int i = 0; i < cols; i++) {
+        for (int i = 0; i < e.cols; i++) {
             XSSFCell cell = row.getCell(i);
             titles.add(cell.toString());
         }
@@ -212,7 +218,146 @@ public class Excel {
         System.out.println("[DONE] Successfully created the map array");
         return result;
     }
+    public static int getDatabaseCount(ResultSet rs) throws Exception{
+        int size = 0;
+        while(rs.next())
+            size++;
+        return size;
+    }
+    public static ArrayList<String> getDatabaseColumns(ResultSetMetaData md) throws Exception{
+        ArrayList<String> result = new ArrayList<String>();
+        for(int i = 0; i < md.getColumnCount(); i++)
+            result.add(md.getColumnName(i+1));
+        return result;
+    }
+    
+    private static boolean isInt(String val) {
+        if (val == null)
+            return false;
+        int length = val.length();
+        if (length == 0)
+            return false;
+        int i = 0;
+        if (val.charAt(0) == '-') {
+            if (length == 1)
+                return false;
+            i = 1;
+        }
+        for (; i < length; i++) {
+            char c = val.charAt(i);
+            if (c < '0' || c > '9')
+                return false;
+        }
+        return true;
+    }
+    public static void compareTo(Excel e1, ResultSet rs) throws Exception {
+        ResultSetMetaData md = rs.getMetaData();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
+        Date date = new Date();
+        map = new Map("src/main/java/com/excel/sheets/map.xlsx");
+        map.setAll();
+        ArrayList<String> source = map.getSource();
+        ArrayList<String> target = map.getTarget();
+        ArrayList<Function> functions = map.getFunctions();
+        ArrayList<condition> defaults = map.getDefaults();
+        ArrayList<String> sourcekeys = map.getSourceKeys();
+        ArrayList<String> targetkeys = map.getTargetKeys();
+        String sourceName = map.getSourceName();
+        String targetName = map.getTargetName();
+        String FILE_PATH = "./src/main/java/com/main/log/" + sourceName + "_" + targetName + "_log_" + sdf.format(date)
+                + ".txt";
+        File log = new File(FILE_PATH);
+        log.createNewFile();
+        String result = "";
+        FileWriter myWriter = new FileWriter(FILE_PATH);
 
+        result += "Comparing EXCEL file with MYSQL file\n\n-->> Comparing Length of both files_"
+                + sdf.format(date) + " \n";
+        int databaseCount = Excel.getDatabaseCount(rs);
+        if (databaseCount == e1.rows)
+            result += ("[INFO] Number of records in both files is the same [" + databaseCount + "]\n\n");
+        else
+            result += ("[WARNING] Number of records in both files is NOT the same [SOURCE = " + e1.rows
+                    + "][TARGET = " + databaseCount + "]\n\n");
+        result += ("-->> Comparing COLUMNS in both files_" + sdf.format(date) + " \n");
+        int databaseColumn = md.getColumnCount();
+        if (databaseColumn == e1.cols)
+            result += ("[INFO] Number of columns in both files is the same [" + e1.cols + "]\n\n");
+        else
+            result += ("[WARNING] Number of columns is NOT the same [# of columns in SOURCE = " + e1.cols
+                    + "][# of columns in TARGET = " + databaseColumn + "]\n\n");
+        ArrayList<String> databaseTitles = Excel.getDatabaseColumns(md);
+        ArrayList<String> database = new ArrayList<String>(databaseTitles);
+        databaseTitles = new ArrayList<String>(databaseTitles.subList(1,databaseTitles.size()-1));
+        ArrayList<String> excelTitles = Excel.getTitles(e1);
+        ArrayList<String> excel = new ArrayList<String>(excelTitles);
+        excelTitles = new ArrayList<String>(excelTitles.subList(1,excelTitles.size()-1));
+        
+        
+        databaseTitles.removeAll(new ArrayList<String>(target));
+        excelTitles.removeAll(new ArrayList<String>(source));
+        for(int i = 1; i < databaseTitles.size(); i++)
+            result += "[ERROR] The column " + databaseTitles.get(i) + " is not found in the map sheet.\n";
+        for(int i = 1; i < excelTitles.size(); i++)
+            result += "[ERROR] The column " + excelTitles.get(i) + " is not found in the map sheet.\n";
+        
+        result += ("-->> Comparing DATA in both files_" + sdf.format(date) + "\n\n");
+        Iterator<Row> rows = e1.sheet.iterator();
+        Row row;
+        int counter = 1;
+        int functioncounters = 0;
+        rs.first();
+        while(rows.hasNext() && rs.next()) {
+            row = rows.next();
+            counter = 0;
+            functioncounters = 0;
+            while(counter < source.size()) {
+                while(functioncounters < functions.size()){
+                    long f1 = functions.get(functioncounters).apply(row.getCell(excel.indexOf(functions.get(functioncounters).source)).toString(),
+                            row.getCell(excel.indexOf(functions.get(functioncounters).target)).toString());
+                    long f2 = functions.get(functioncounters).apply(rs.getString(target.get(source.indexOf(functions.get(functioncounters).source))),rs.getString(target.get(source.indexOf(functions.get(functioncounters).target))));
+                    if (!Function.compare(f1, f2)) {
+                        result += ("ERROR[" + sdf.format(date) + "]: @" + sourcekeys.get(0) + " = ["
+                                + row.getCell(excel.indexOf(sourcekeys.get(0))) + "] FUNCTION in SOURCE = ["
+                                + functions.get(functioncounters).source
+                                + functions.get(functioncounters).function
+                                + functions.get(functioncounters).target + "] VALUE of function for SOURCE = ["
+                                + f1 + "]  FUNCTION in TARGET = ["
+                                + target.get(source.indexOf(functions.get(functioncounters).source))
+                                + functions.get(functioncounters).function
+                                + target.get(source.indexOf(functions.get(functioncounters).target))
+                                + "] VALUE of function in TARGET= ["
+                                + f2 + "]\n");
+                    }
+                    functioncounters++;
+                }
+                String sourceValue = row.getCell(excel.indexOf(source.get(counter))).toString();
+                String targetValue = rs.getString(target.get(counter));
+                for(int j=0;j<defaults.size();j++) {
+                    if (defaults.get(j).source == (source.get(counter)) && isInt(row.getCell(excel.indexOf(source.get(counter))).toString()))
+                        sourceValue = (defaults.get(j)
+                                .apply(Integer.parseInt(row.getCell(excel.indexOf(source.get(counter))).toString())));
+                    if (defaults.get(j).target == (target.get(counter)) && isInt(
+                            row.getCell(excel.indexOf(source.get(counter))).toString()))
+                        targetValue = defaults.get(j)
+                                .apply(Integer.parseInt(rs.getString(target.get(counter))));
+                }
+                if(!databaseTitles.contains(target.get(counter)) && !excelTitles.contains(source.get(counter))){
+                    if(!sourceValue.equals(targetValue)){
+                        result += "ERROR[" + sdf.format(date) + "]: @" + sourcekeys.get(0) + " = ["
+                                + row.getCell(excel.indexOf(sourcekeys.get(0))) + "] COLUMN_NAME in SOURCE = [" + source.get(counter)
+                                + "] VALUE in SOURCE = ["
+                                + sourceValue + "]  COLUMN_NAME in TARGET = ["
+                                + target.get(counter) + "] VALUE in TARGET= ["
+                                + targetValue + "]\n";
+                    }
+                }
+                counter++;
+            }
+        }
+        System.out.println(result);
+        System.out.println("Finished");
+    }
     public static void compare(Record db1, Record db2, String fileType1, String fileType2) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
         Date date = new Date();
@@ -231,6 +376,7 @@ public class Excel {
         String result = "";
 
         FileWriter myWriter = new FileWriter(FILE_PATH);
+        
 
         result += "Comparing " + fileType1 + " file with " + fileType2 + " file\n\n-->> Comparing Length of both files_"
                 + sdf.format(date) + " \n";
@@ -255,6 +401,7 @@ public class Excel {
             result += "[WARNING] The column " + sourceDiffs.get(i)
                     + " from the SOURCE file is not identical to the original sheet. The column will not be compared\n\n";
         }
+        
         for (int i = 0; i < targetDiffs.size(); i++) {
             source.remove(source.get(target.indexOf(targetDiffs.get(i))));
             target.remove(target.get(target.indexOf(targetDiffs.get(i))));

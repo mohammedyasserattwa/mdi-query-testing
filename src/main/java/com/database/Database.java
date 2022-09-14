@@ -19,28 +19,59 @@ public class Database {
             this.con = DriverManager.getConnection(
                     this.url+"/"+this.schema,this.username,this.password
             );
-            this.stmt = this.con.createStatement();
+            this.stmt = this.con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         } catch(Exception e) {
             System.out.println(e);
         }
     }
-    public Record read(String col, String table) throws SQLException {
-        ResultSet rs = this.stmt.executeQuery("SELECT " + col + " from " + table);
+    public Database() throws ClassNotFoundException{
+        Class.forName("oracle.jdbc.driver.OracleDriver");
+        this.url = "jdbc:oracle:thin:@localhost:1521:xe";
+        this.username = "SYS as SYSDBA";
+        this.password = "root";
+        try {
+        Class.forName("oracle.jdbc.driver.OracleDriver");
+        Connection con = DriverManager.getConnection(this.url, this.username, this.password);
+        System.out.println("connect oracle db");
+        Statement stmt = con.createStatement();
+
+        // String selectStat = "SELECT * FROM fady";
+        PreparedStatement ps = con.prepareStatement("SELECT * FROM locations11");
+
+        ResultSet rs = ps.executeQuery();
         ResultSetMetaData metaData = rs.getMetaData();
-        // ArrayList<HashMap> result = new ArrayList();
-        Record result = new Record();
-        Record tmp = new Record();
-        int j = 1;
+        while (rs.next())
+        System.out.println(rs.getString(4));
+
         while(rs.next()) {
-            for (int i = 0; i < metaData.getColumnCount(); i++) {
-                tmp.put(metaData.getColumnName(i + 1), rs.getString(metaData.getColumnName(i + 1)));
-            }
-            if(j++ == 1)
-                result.next = tmp;
-            tmp.next = new Record();
-            tmp = tmp.next;
+        for (int i = 0; i < metaData.getColumnCount(); i++) {
+        System.out.println(rs.getString(i));
         }
-        return result;
+        }
+
+        } catch (Exception e) {
+        System.out.println("opps!");
+        e.printStackTrace();
+        }
+    }
+    public ResultSet read(String col, String table) throws SQLException {
+        ResultSet rs = this.stmt.executeQuery("SELECT " + col + " from " + table);
+        // ResultSetMetaData metaData = rs.getMetaData();
+        return rs;
+        // ArrayList<HashMap> result = new ArrayList();
+        // Record result = new Record();
+        // Record tmp = new Record();
+        // int j = 1;
+        // while(rs.next()) {
+        //     for (int i = 0; i < metaData.getColumnCount(); i++) {
+        //         tmp.put(metaData.getColumnName(i + 1), rs.getString(metaData.getColumnName(i + 1)));
+        //     }
+        //     if(j++ == 1)
+        //         result.next = tmp;
+        //     tmp.next = new Record();
+        //     tmp = tmp.next;
+        // }
+        // return result;
     }
     public Record read(String col,String table, String condition) throws SQLException{
         ResultSet rs = this.stmt.executeQuery("SELECT " + col + " from " + table + " WHERE " + condition);
